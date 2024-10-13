@@ -6,6 +6,11 @@ import java.util.concurrent.*;
 
 public class ReportServiceExecutors {
 
+    {
+        var numOfCores = Runtime.getRuntime().availableProcessors();
+        System.out.println("Number of processors is " + numOfCores);
+    }
+
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private LoadGenerator loadGenerator = new LoadGenerator();

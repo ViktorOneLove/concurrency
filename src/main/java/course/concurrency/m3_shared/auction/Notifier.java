@@ -1,9 +1,14 @@
 package course.concurrency.m3_shared.auction;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
 public class Notifier {
+    ExecutorService ex = Executors.newFixedThreadPool(1000);
 
     public void sendOutdatedMessage(Bid bid) {
-        imitateSending();
+        ex.submit(() -> imitateSending());
     }
 
     private void imitateSending() {
@@ -13,5 +18,7 @@ public class Notifier {
         } catch (InterruptedException e) {}
     }
 
-    public void shutdown() {}
+    public void shutdown() {
+        ex.shutdownNow();
+    }
 }

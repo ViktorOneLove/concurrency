@@ -2,6 +2,7 @@ package course.concurrency.m2_async.minPrice;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.*;
 
 public class PriceAggregator {
 
@@ -18,7 +19,26 @@ public class PriceAggregator {
     }
 
     public double getMinPrice(long itemId) {
-        // place for your code
-        return 0;
+        Executor ex = Executors.newCachedThreadPool();
+
+        var fp = shopIds.stream()
+                .map(shopId -> CompletableFuture
+                        .supplyAsync(() -> priceRetriever.getPrice(itemId, shopId), ex)
+                        .completeOnTimeout(Double.NaN, 2900, TimeUnit.MILLISECONDS)
+                        .exceptionally(__ -> Double.NaN)
+                ).toList();
+
+        // TODO seems redundant
+        CompletableFuture
+                .allOf(fp.toArray(CompletableFuture[]::new))
+                .join();
+
+        return fp
+                .stream()
+                .mapToDouble(CompletableFuture::join)
+                .filter(Double::isFinite)
+                .min()
+                .orElse(Double.NaN);
+
     }
 }
